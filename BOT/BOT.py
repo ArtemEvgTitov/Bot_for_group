@@ -10,31 +10,21 @@ from telegram.ext import (
     Filters,
     ConversationHandler,
 )
-hello = []
-hello_text = []
+
 work_schedule = []
 
 
 def message(update, _):
     text = update.message.text
-    load()
     if text == 'Бот график':
+        load()
         update.message.reply_text(work_schedule[0])
     elif text == '#график':
         work_schedule.append(text)
         save()
-    elif text in hello_text:
-        random_photo = random.choice(hello)
-        update.message.reply_text(random_photo)
 
 def load():
-    global hello
-    global hello_text
     global work_schedule
-    with open("hello.json", "r", encoding="utf-8") as fh:
-        hello = json.load(fh)
-    with open("hello_text.json", "r", encoding="utf-8") as fh:
-        hello_text = json.load(fh)
     with open("work_schedule.json", "r", encoding="utf-8") as fh:
         work_schedule = json.load(fh)
 
