@@ -1,43 +1,39 @@
-import logger as log
 from settings import TOKEN
+import telebot
 import random
 import json
-from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
-from telegram.ext import (
-    Updater,
-    CommandHandler,
-    MessageHandler,
-    Filters,
-    ConversationHandler,
-)
+import re
+from telebot import types
 
-work_schedule = []
+bot = telebot.TeleBot(TOKEN)
+
+films = []
+hello = []
+hello_text = []
+
+def load_hello():
+    global hello
+    global hello_text
+    with open("hello.json", "r", encoding="utf-8") as fh:
+        hello = json.load(fh)
+    with open("hello_text.json", "r", encoding="utf-8") as fh:
+        hello_text = json.load(fh)
+
+def is_part_in_list(str_, words):
+    for word in words:
+        if word in str_:
+            return True
+    return False
+@bot.message_handler(content_types=['text'])
+def get_text_messages(message):
+    load_hello()
+    if is_part_in_list(message.text, hello_text):
+        random_photo = random.choice(hello)
+        bot.send_photo(
+            message.chat.id, photo=f'{random_photo}')
+    else:
+        bot.send_message(message.from_user.id,
+                         "Я тебя не понимаю. 😔")
 
 
-def message(update, _):
-    text = update.message.text
-    if text == 'Бот график':
-        load()
-        update.message.reply_text(work_schedule[0])
-    elif text == '#график':
-        work_schedule.append(text)
-        save()
-
-def load():
-    global work_schedule
-    with open("work_schedule.json", "r", encoding="utf-8") as fh:
-        work_schedule = json.load(fh)
-
-def save():
-    with open("work_schedule.json", "w", encoding="utf-8") as graf:
-        graf.write(json.dumps(work_schedule, ensure_ascii=False))
-
-if __name__ == '__main__':
-    updater = Updater(token=TOKEN)
-    dispatcher = updater.dispatcher
-    message_handler = MessageHandler(Filters.text, message)
-
-dispatcher.add_handler(message_handler)
-
-updater.start_polling()
-updater.idle()
+bot.polling(none_stop=True)
