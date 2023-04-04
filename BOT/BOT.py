@@ -9,6 +9,7 @@ work_schedule = []
 hello = []
 hello_text = []
 
+
 def load_hello():
     global hello
     global hello_text
@@ -16,6 +17,7 @@ def load_hello():
         hello = json.load(fh)
     with open("hello_text.json", "r", encoding="utf-8") as fh:
         hello_text = json.load(fh)
+
 
 def load_graf():
     global work_schedule
@@ -25,11 +27,14 @@ def load_graf():
     except:
         print("Графика нет")
 
+
 def is_part_in_list(str_, words):
     for word in words:
         if word in str_:
             return True
     return False
+
+
 @bot.message_handler(content_types=['text', 'photo'])
 def get_text_messages(message):
     load_hello()
