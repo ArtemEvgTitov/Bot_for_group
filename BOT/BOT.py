@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+import time
 from settings import TOKEN
 import telebot
 import random
@@ -45,16 +46,33 @@ def get_text_messages(message):
         random_photo = random.choice(hello)
         bot.send_photo(
             message.chat.id, photo=f'{random_photo}')
-    elif "Заявление " in message.text:
+    elif "все заявления" in (message.text).lower():
+        load_statements()
+        count = 1
+        for i in Statements:
+            date = i['date']
+            text = i['statement']
+            bot.send_message(message.from_user.id, f"{count}. {date}, {text}")
+            count += 1
+
+    elif "заявление " in (message.text).lower():
+        load_statements()
+        week = 604800
         message.text = re.sub('Заявление ', '', message.text)
-        time = datetime.utcfromtimestamp(message.date).strftime('%Y-%m-%d')
-        statements_element = {"type": 'Заявление', "date": time, "statement": message.text}
+        time_message = datetime.utcfromtimestamp(message.date).strftime('%Y-%m-%d')
+        time_notification = datetime.utcfromtimestamp(message.date + week).strftime('%Y-%m-%d')
+        statements_element = {"type": 'Заявление', "date": time_message, "statement": message.text, "date_notif": time_notification}
         Statements.append(statements_element)
         save_statements()
         print(statements_element)
         bot.send_message(message.from_user.id,
                          f"Сохранил.\nТип: {statements_element['type']}"
                          f"\nДата: {statements_element['date']}"
+                         f"\nТекст: {statements_element['statement']}"
+                         f"\nДата напоминания: {statements_element['date_notif']}")
+        time.sleep(10)
+        bot.send_message(message.from_user.id,
+                         f"Напоминаю!.\nТип: {statements_element['type']}"
                          f"\nТекст: {statements_element['statement']}")
 
     else:
