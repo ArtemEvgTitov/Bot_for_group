@@ -18,10 +18,12 @@ def load_statements():
     with open("Statements.json", "r", encoding="utf-8") as stat:
         Statements = json.load(stat)
 
+
 def save_statements():
     with open("Statements.json", "w", encoding="utf-8") as stat:
         stat.write(json.dumps(Statements, ensure_ascii=False))
     print("Заявление сохранено")
+
 
 def load_hello():
     global hello
@@ -59,9 +61,12 @@ def get_text_messages(message):
         load_statements()
         week = 604800
         message.text = re.sub('Заявление ', '', message.text)
-        time_message = datetime.utcfromtimestamp(message.date).strftime('%Y-%m-%d')
-        time_notification = datetime.utcfromtimestamp(message.date + week).strftime('%Y-%m-%d')
-        statements_element = {"type": 'Заявление', "date": time_message, "statement": message.text, "date_notif": time_notification}
+        time_message = datetime.utcfromtimestamp(
+            message.date).strftime('%Y-%m-%d')
+        time_notification = datetime.utcfromtimestamp(
+            message.date + week).strftime('%Y-%m-%d')
+        statements_element = {"type": 'Заявление', "date": time_message,
+                              "statement": message.text, "date_notif": time_notification}
         Statements.append(statements_element)
         save_statements()
         print(statements_element)
