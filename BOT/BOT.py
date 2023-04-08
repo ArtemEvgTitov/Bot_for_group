@@ -14,15 +14,18 @@ Statements = []
 
 
 def load_statements():
-    global Statements
-    with open("Statements.json", "r", encoding="utf-8") as stat:
-        Statements = json.load(stat)
+    try:
+        global Statements
+        with open("Statements.json", "r", encoding="utf-8") as stat:
+            Statements = json.load(stat)
+    except:
+        save_statements()
+        load_statements()
 
 
 def save_statements():
     with open("Statements.json", "w", encoding="utf-8") as stat:
         stat.write(json.dumps(Statements, ensure_ascii=False))
-    print("Заявление сохранено")
 
 
 def load_hello():
@@ -50,22 +53,27 @@ def get_text_messages(message):
             message.chat.id, photo=f'{random_photo}')
     elif "все заявления" in (message.text).lower():
         load_statements()
-        count = 1
-        for i in Statements:
-            date = i['date']
-            text = i['statement']
-            bot.send_message(message.from_user.id, f"{count}. {date}, {text}")
-            count += 1
+        if Statements == []:
+            bot.send_message(message.from_user.id, "Список пуст")
+        else:
+            for i in Statements:
+                id = i['ID']
+                date = i['date']
+                text = i['statement']
+                bot.send_message(message.from_user.id, f"ID {id}. {date}, {text}")
 
     elif "заявление " in (message.text).lower():
         load_statements()
         week = 604800
-        message.text = re.sub('Заявление ', '', message.text)
+        id = 0
+        if Statements != []:
+            id = 1 + Statements[-1]['ID']
+        message.text = re.sub('заявление ', '', message.text)
         time_message = datetime.utcfromtimestamp(
             message.date).strftime('%Y-%m-%d')
         time_notification = datetime.utcfromtimestamp(
             message.date + week).strftime('%Y-%m-%d')
-        statements_element = {"type": 'Заявление', "date": time_message,
+        statements_element = {"ID": id, "type": 'Заявление', "date": time_message,
                               "statement": message.text, "date_notif": time_notification}
         Statements.append(statements_element)
         save_statements()
@@ -75,11 +83,6 @@ def get_text_messages(message):
                          f"\nДата: {statements_element['date']}"
                          f"\nТекст: {statements_element['statement']}"
                          f"\nДата напоминания: {statements_element['date_notif']}")
-        time.sleep(10)
-        bot.send_message(message.from_user.id,
-                         f"Напоминаю!.\nТип: {statements_element['type']}"
-                         f"\nТекст: {statements_element['statement']}")
-
     else:
         bot.send_message(message.from_user.id,
                          "Я тебя не понимаю. 😔")
