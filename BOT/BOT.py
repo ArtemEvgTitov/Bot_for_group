@@ -60,7 +60,8 @@ def get_text_messages(message):
                 id = i['ID']
                 date = i['date']
                 text = i['statement']
-                bot.send_message(message.from_user.id, f"ID {id}. {date}, {text}")
+                bot.send_message(message.from_user.id,
+                                 f"ID {id}. {date}, {text}")
 
     elif "заявление " in (message.text).lower():
         load_statements()
